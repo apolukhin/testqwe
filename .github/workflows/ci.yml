@@ -1,0 +1,44 @@
+name: CI
+
+'on':
+    pull_request:
+    push:
+        branches:
+          - develop
+
+env:
+    UBSAN_OPTIONS: print_stacktrace=1
+
+jobs:
+    posix:
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                  - os: ubuntu-18.04
+                    info: g++-9 + test-debug
+                    packages: postgresql
+
+                  - os: ubuntu-20.04
+                    info: g++-9 + test-release
+                    packages: postgresql-12
+
+        name: '${{matrix.os}}: ${{matrix.info}}'
+        runs-on: ${{matrix.os}}
+
+        steps:
+          - uses: actions/checkout@v2
+
+          - name: Install packages
+            run: |
+                sudo apt install --allow-downgrades -y ${{matrix.packages}}
+
+          - name: Run psql
+            run: |
+                sudo service postgresql@12-main start
+                pg_lsclusters
+                sudo -u postgres psql -p5433 --command="CREATE USER service_template PASSWORD 'service_template-password'" --command="\du"
+                sudo -u postgres createdb -p5433 --owner=service_template service_template_table
+                PGPASSWORD=service_template-password psql 'postgresql://service_template@localhost:5433/service_template_table' --list service_template_table
+                echo "SELECT 1" >pg_select.sql
+                PGPASSWORD=service_template-password psql 'postgresql://service_template@localhost:5433/service_template_table' -f pg_select.sql
