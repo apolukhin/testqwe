@@ -31,7 +31,7 @@ jobs:
 
           - name: Install packages
             run: |
-                sudo apt purge postgresql
+                sudo apt purge -y postgresql
                 sudo apt install --allow-downgrades -y ${{matrix.packages}}
 
           - name: Run psql
