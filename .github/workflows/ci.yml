@@ -31,15 +31,9 @@ jobs:
             run: |
                 sudo apt install --allow-downgrades -y postgresql-12
 
-          - name: Run psql 1
+          - name: Run psql
             run: |
-            	sudo -u postgres psql --command="CREATE USER service_template PASSWORD 'service_template-password'" --command="\du"
-
-          - name: Run psql 2
-            run: |
-            	sudo -u postgres createdb --owner=service_template service_template_table
-
-          - name: Run psql 3
-            run: |
-            	PGPASSWORD=service_template-password psql 'postgresql://service_template@localhost:5432/service_template_table' --list service_template_table
+                sudo -u postgres psql --command="CREATE USER service_template PASSWORD 'service_template-password'" --command="\du"
+                sudo -u postgres createdb --owner=service_template service_template_table
+                PGPASSWORD=service_template-password psql 'postgresql://service_template@localhost:5432/service_template_table' --list service_template_table
                 
