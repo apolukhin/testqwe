@@ -31,12 +31,11 @@ jobs:
 
           - name: Install packages
             run: |
-                sudo apt purge -y postgresql
                 sudo apt install --allow-downgrades -y ${{matrix.packages}}
 
           - name: Run psql
             run: |
-                sudo service postgresql start
+                sudo service postgresql@12-main start
                 pg_lsclusters
                 sudo -u postgres psql --command="CREATE USER service_template PASSWORD 'service_template-password'" --command="\du"
                 sudo -u postgres createdb --owner=service_template service_template_table
