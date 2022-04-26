@@ -17,9 +17,11 @@ jobs:
                 include:
                   - os: ubuntu-18.04
                     info: g++-9 + test-debug
+                    packages: postgresql
 
                   - os: ubuntu-20.04
                     info: g++-9 + test-release
+                    packages: postgresql-12
 
         name: '${{matrix.os}}: ${{matrix.info}}'
         runs-on: ${{matrix.os}}
@@ -29,10 +31,11 @@ jobs:
 
           - name: Install packages
             run: |
-                sudo apt install --allow-downgrades -y postgresql-12
+                sudo apt install --allow-downgrades -y ${{matrix.packages}}
 
           - name: Run psql
             run: |
+                sudo service postgresql start
                 sudo -u postgres psql --command="CREATE USER service_template PASSWORD 'service_template-password'" --command="\du"
                 sudo -u postgres createdb --owner=service_template service_template_table
                 PGPASSWORD=service_template-password psql 'postgresql://service_template@localhost:5432/service_template_table' --list service_template_table
